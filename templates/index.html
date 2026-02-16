@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 40px;">
+    <h1>Welcome to the National Election System</h1>
+    <p>Secure, Transparent, and Efficient Electronic Voting</p>
+</div>
+
+<div class="card">
+    <h2>Ongoing Elections</h2>
+    {% if elections %}
+    <table>
+        <thead>
+            <tr>
+                <th>Election Title</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for election in elections %}
+            <tr>
+                <td><strong>{{ election.Title }}</strong></td>
+                <td>{{ election.ElectionDate }}</td>
+                <td>{{ election.Type }}</td>
+                <td><span class="status-{{ election.Status|lower }}">{{ election.Status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{{ url_for('vote') }}" class="button">Cast Your Vote Now</a>
+    </div>
+    {% else %}
+    <p>No elections are currently ongoing.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Information for Voters</h2>
+    <ul>
+        <li>Ensure you have your EPIC Number ready.</li>
+        <li>You can only vote in your registered constituency.</li>
+        <li>Voting is allowed only between 7:00 AM and 6:00 PM on election day.</li>
+    </ul>
+    <a href="{{ url_for('register') }}" style="color:lightblue">New Voter? Register Here</a>
+</div>
+{% endblock %}

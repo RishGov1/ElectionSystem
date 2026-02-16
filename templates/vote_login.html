@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2>Login to Vote</h2>
+    <p>Please enter your details to access the ballot.</p>
+
+    <form method="POST" action="{{ url_for('vote') }}">
+        <label for="epic">EPIC Number:</label>
+        <input type="text" id="epic" name="epic" required placeholder="Enter your Voter ID">
+
+        <label for="election_id">Select Election:</label>
+        <select id="election_id" name="election_id" required>
+            {% for election in elections %}
+            <option value="{{ election.ElectionID }}">{{ election.Title }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Authenticate</button>
+    </form>
+</div>
+{% endblock %}

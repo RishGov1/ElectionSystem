@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Voter Registration</h2>
+    <form method="POST" action="{{ url_for('register') }}">
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="epic">EPIC Number (Unique ID):</label>
+        <input type="text" id="epic" name="epic" required placeholder="e.g. ABC1234567">
+
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" required>
+
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="address">Address:</label>
+        <textarea id="address" name="address" required></textarea>
+
+        <label for="constituency">Constituency:</label>
+        <select id="constituency" name="constituency" required>
+            {% for c in constituencies %}
+            <option value="{{ c.ConstituencyID }}">{{ c.Name }} ({{ c.State }})</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Register</button>
+    </form>
+</div>
+{% endblock %}

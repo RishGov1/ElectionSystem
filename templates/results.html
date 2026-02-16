@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>Election Analytics Dashboard</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+
+    <!-- Turnout Stats -->
+    <div class="card">
+        <h2>Voter Turnout by Constituency</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Election</th>
+                    <th>Constituency</th>
+                    <th>Turnout %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in turnout %}
+                <tr>
+                    <td>{{ row.Election }}</td>
+                    <td>{{ row.Constituency }}</td>
+                    <td>
+                        <div class="progress-bar-container"
+                            style="background: var(--bg-input); width: 100%; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 4px;">
+                            <div
+                                style="background: var(--accent-primary); width: {{ row.TurnoutPercentage | default(0) | string + '%' }}; height: 100%; border-radius: 4px;">
+                            </div>
+                        </div>
+                        <small style="color: var(--text-secondary);">{{ row.TurnoutPercentage }}%</small>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Party Performance -->
+    <div class="card">
+        <h2>Overall Party Performance</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Party</th>
+                    <th>Symbol</th>
+                    <th>Total Votes Secured</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in party_perf %}
+                <tr>
+                    <td>{{ row.PartyName }}</td>
+                    <td>{{ row.Symbol }}</td>
+                    <td>{{ row.TotalVotesSecured }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Declared Results (Election 1)</h2>
+    <p class="mb-4" style="color: var(--text-secondary);"><em>Winners calculated via Stored Procedure.</em></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Constituency</th>
+                <th>Winner Name</th>
+                <th>Party</th>
+                <th>Votes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in declared_results %}
+            <tr style="background-color: rgba(16, 185, 129, 0.05);">
+                <td>{{ row.Constituency }}</td>
+                <td style="font-weight: bold; color: var(--success);">{{ row.WinnerName }} 👑</td>
+                <td>{{ row.WinningParty }}</td>
+                <td>{{ row.Votes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Top 10 Candidates (Live Tally)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Candidate</th>
+                <th>Party</th>
+                <th>Election</th>
+                <th>Constituency</th>
+                <th>Votes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_candidates %}
+            <tr>
+                <td>{{ row.CandidateName }}</td>
+                <td>{{ row.PartyName }}</td>
+                <td>{{ row.Election }}</td>
+                <td>{{ row.Constituency }}</td>
+                <td><strong>{{ row.VotesReceived }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

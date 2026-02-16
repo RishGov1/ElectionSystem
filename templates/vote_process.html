@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap;">
+    <div>
+        <h2>Official Ballot</h2>
+        <p><strong>Voter:</strong> {{ voter.Name }} ({{ voter.EPIC_Number }})</p>
+        <p><strong>Constituency:</strong> {{ constituency.Name }}</p>
+    </div>
+    <div class="card" style="padding: 15px; margin-bottom: 0; border: 1px solid var(--accent-primary);">
+        <p style="margin: 0; font-size: 0.9em; font-weight: 600; color: var(--accent-primary);">Polling Station Details
+        </p>
+        <small style="color: var(--text-secondary);">Please verify your booth details below.</small>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <h3>Cast Your Vote</h3>
+    <p class="mb-4">Select one candidate from the list below. This action is irreversible.</p>
+
+    <form method="POST" action="{{ url_for('vote') }}" style="max-width: 100%;">
+        <!-- Hidden Information Passed Through -->
+        <input type="hidden" name="voter_id" value="{{ voter.VoterID }}">
+        <input type="hidden" name="election_id" value="{{ election_id }}">
+        <input type="hidden" name="constituency_id" value="{{ constituency.ConstituencyID }}">
+
+        <label for="booth_id">Select Your Polling Booth (Verification):</label>
+        <select name="booth_id" id="booth_id" required style="margin-bottom: 20px;">
+            {% for booth in booths %}
+            <option value="{{ booth.BoothID }}">{{ booth.BoothName }} - {{ booth.Location }}</option>
+            {% endfor %}
+        </select>
+
+        <table style="margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Symbol</th>
+                    <th>Candidate Name</th>
+                    <th>Party</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in candidates %}
+                <tr>
+                    <td style="text-align: center;">
+                        <input type="radio" name="candidate_id" value="{{ candidate.CandidateID }}" required
+                            style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
+                    </td>
+                    <td><strong>{{ candidate.Symbol }}</strong></td>
+                    <td>{{ candidate.Name }}</td>
+                    <td>{{ candidate.PartyName }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: right;">
+            <button type="submit" class="button" style="background-color: var(--success);">CONFIRM VOTE</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
