@@ -5,6 +5,8 @@ INSERT INTO PoliticalParty (PartyName, Symbol, Leader, FoundationDate) VALUES
 ('National Progress Party', 'Sun', 'Amit Verma', '1995-08-15'),
 ('People’s Voice', 'Microphone', 'Sarah Khan', '2010-01-26'),
 ('Green Earth Alliance', 'Tree', 'Rajesh Gupta', '2005-06-05'),
+('United People''s Alliance', 'Rising Sun', 'Rajesh Khanna', '2015-05-12'),
+('Justice and Peace Party', 'Balance Scale', 'Sarah Jacob', '2018-11-20'),
 ('Independent', 'Kite', 'N/A', NULL);
 
 -- 2. Insert Constituencies
@@ -12,7 +14,11 @@ INSERT INTO Constituency (Name, State, Type) VALUES
 ('North Delhi', 'Delhi', 'Urban'),
 ('South Bengaluru', 'Karnataka', 'Urban'),
 ('Varanasi', 'Uttar Pradesh', 'Semi-Urban'),
-('Wayanad', 'Kerala', 'Rural');
+('Wayanad', 'Kerala', 'Rural'),
+('Jaipur City', 'Rajasthan', 'Urban'),
+('Lucknow Central', 'Uttar Pradesh', 'Urban'),
+('Thiruvananthapuram', 'Kerala', 'Urban'),
+('Patna Sahib', 'Bihar', 'Urban');
 
 -- 3. Insert Booths
 INSERT INTO Booth (ConstituencyID, BoothName, Location) VALUES 
@@ -26,7 +32,9 @@ INSERT INTO Booth (ConstituencyID, BoothName, Location) VALUES
 -- 4. Insert Elections
 INSERT INTO Election (Title, ElectionDate, Type, Status, Description) VALUES 
 ('General Election 2019', '2019-05-23', 'General', 'Completed', '17th Lok Sabha Election'),
-('State Assembly 2024', CURDATE(), 'State', 'Ongoing', 'State Legislative Assembly Election');
+('State Assembly 2024', CURDATE(), 'State', 'Ongoing', 'State Legislative Assembly Election'),
+('Local Body Election 2025', '2025-06-10', 'Municipal', 'Scheduled', 'Municipal Council Elections'),
+('State Assembly 2025', '2025-10-01', 'State', 'Scheduled', 'State Legislative Assembly Election');
 
 -- 5. Insert Voters (Sample 10)
 INSERT INTO Voter (EPIC_Number, Name, DOB, Gender, Address, ConstituencyID) VALUES 
@@ -54,7 +62,11 @@ INSERT INTO Candidate (Name, PartyID, ConstituencyID, ElectionID, AffidavitDetai
 INSERT INTO Candidate (Name, PartyID, ConstituencyID, ElectionID, AffidavitDetails, TotalAssets) VALUES 
 ('Amit Verma', 1, 1, 2, 'Incumbent', 60000000),
 ('New Challenger', 2, 1, 2, 'Lawyer', 20000000),
-('Saanvi Reddy (Protest)', 4, 2, 2, 'Activist', 5000000);
+('Saanvi Reddy (Protest)', 4, 2, 2, 'Activist', 5000000),
+('Vikram Seth', 1, 5, 3, 'PhD', 8000000),
+('Meenakshi Lekhi', 2, 5, 3, 'Lawyer', 4500000),
+('Sarah Jacob', 6, 6, 3, 'MBA', 3000000),
+('Rajesh Khanna', 5, 6, 3, 'Graduate', 5500000);
 
 -- 7. Insert Participation & Votes (History - Election 1)
 -- Voter 1, 2, 3 vote in Election 1 (Const 1)
