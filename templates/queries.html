@@ -1,43 +1,82 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div style="display: grid; grid-template-columns: 250px 1fr; gap: 24px; align-items: start;">
+<!-- Top Selection Area -->
+<div class="card" style="grid-column: 1 / -1; padding: 24px; margin-bottom: 24px;">
+    <h2 style="margin-top: 0; display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.5rem;">📊</span> Advanced Analytical Dashboard
+    </h2>
+    <p style="color: var(--text-secondary); margin-bottom: 24px; max-width: 800px;">
+        Explore deep insights across 70+ niche queries. Use the filters below to drill down into demographics, election
+        results, and governance metrics.
+    </p>
 
-    <!-- Sidebar: List of Queries -->
-    <div class="card" style="padding: 0; overflow: hidden; position: sticky; top: 100px;">
-        <div
-            style="padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
-            <h3 style="margin: 0; font-size: 1.1rem;">Available Queries</h3>
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: flex-end;">
+        <div>
+            <label style="display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500;">1. Broad
+                Category</label>
+            <select id="mainCategory" class="form-control" style="width: 100%; cursor: pointer;">
+                <option value="">-- Select Category --</option>
+                {% for cat in hierarchy %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-            {% for q in queries %}
-            <li style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-                <a href="{{ url_for('show_query', query_id=q.id) }}"
-                    class="query-link {% if current_query and current_query.id == q.id %}active{% endif %}"
-                    style="border-radius: 0; margin: 0;">
-                    <span style="opacity: 0.7; margin-right: 8px;">{{ q.id }}.</span> {{ q.title }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
 
-    <!-- Main Content: Results -->
-    <div class="card">
+        <div>
+            <label style="display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500;">2.
+                Functional Sub-section</label>
+            <select id="subCategory" class="form-control" style="width: 100%; cursor: pointer;" disabled>
+                <option value="">-- Select Sub-section --</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="display: block; margin-bottom: 8px; color: var(--text-primary); font-weight: 500;">3. Specific
+                Query</label>
+            <select id="querySelector" class="form-control" style="width: 100%; cursor: pointer;" disabled>
+                <option value="">-- Select Query --</option>
+            </select>
+        </div>
+
+        <div style="flex-grow: 0;">
+            <button id="runQueryBtn" class="btn btn-primary" style="height: 48px; width: 100%; min-width: 160px;"
+                disabled>
+                Generate Analysis
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Results Area -->
+<div id="resultsContent" style="grid-column: 1 / -1;">
+    <div class="card" style="min-height: 400px;">
         {% if current_query %}
-        <h2>{{ current_query.title }}</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">{{ current_query.title }}</h2>
+            <span class="badge" style="background: var(--accent-primary); color: white;">ID: #{{ current_query.id
+                }}</span>
+        </div>
+
         <div
-            style="background: var(--bg-body); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
-            <code style="color: var(--accent-primary); font-family: monospace;">{{ current_query.sql }}</code>
+            style="background: var(--bg-body); padding: 16px; border-radius: 8px; margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative;">
+            <span
+                style="position: absolute; top: -10px; left: 15px; background: var(--bg-card); padding: 0 8px; font-size: 0.75rem; color: var(--text-secondary);">SQL
+                SOURCE INDICATOR</span>
+            <code
+                style="color: var(--accent-primary); font-family: 'Courier New', monospace; font-size: 0.95rem; line-height: 1.5;">{{ current_query.sql }}</code>
         </div>
 
         {% if results %}
-        <div style="overflow-x: auto;">
-            <table>
+        <div style="overflow-x: auto; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <table style="margin-bottom: 0;">
                 <thead>
                     <tr>
                         {% for key in results[0].keys() %}
-                        <th style="text-transform: capitalize;">{{ key }}</th>
+                        <th
+                            style="padding: 16px; background: rgba(255, 255, 255, 0.02); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">
+                            {{ key|replace('_', ' ') }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -45,7 +84,7 @@
                     {% for row in results %}
                     <tr>
                         {% for value in row.values() %}
-                        <td>{{ value }}</td>
+                        <td style="padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03);">{{ value }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -53,16 +92,125 @@
             </table>
         </div>
         {% else %}
-        <p class="alert alert-danger">No results found.</p>
+        <div style="text-align: center; padding: 60px 0;">
+            <p style="color: var(--danger-color); font-size: 1.1rem;">No data found for this specific query
+                configuration.</p>
+        </div>
         {% endif %}
 
         {% else %}
-        <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
-            <h3 style="color: var(--text-primary); margin-bottom: 10px;">Select a query to view results</h3>
-            <p>Explore SQL capabilities including Joins, Windows Functions, Aggregations, and Subqueries.</p>
+        <div style="text-align: center; padding: 100px 20px; color: var(--text-secondary);">
+            <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;">🔍</div>
+            <h3 style="color: var(--text-primary); margin-bottom: 10px;">Ready for Deep Analysis</h3>
+            <p style="max-width: 500px; margin: 0 auto;">Select a configuration above to begin. Our system will analyze
+                the database and render the requested niche metrics in real-time.</p>
         </div>
         {% endif %}
     </div>
-
 </div>
+
+<script>
+    const hierarchyData = {{ hierarchy| tojson }};
+    const mainCategory = document.getElementById('mainCategory');
+    const subCategory = document.getElementById('subCategory');
+    const querySelector = document.getElementById('querySelector');
+    const runQueryBtn = document.getElementById('runQueryBtn');
+
+    // Step 1: Handle Broad Category Change
+    mainCategory.addEventListener('change', function () {
+        const catId = this.value;
+        subCategory.innerHTML = '<option value="">-- Select Sub-section --</option>';
+        querySelector.innerHTML = '<option value="">-- Select Query --</option>';
+        subCategory.disabled = true;
+        querySelector.disabled = true;
+        runQueryBtn.disabled = true;
+
+        if (catId) {
+            const category = hierarchyData.find(c => c.id === catId);
+            if (category && category.subs) {
+                category.subs.forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub.id;
+                    option.textContent = sub.name;
+                    subCategory.appendChild(option);
+                });
+                subCategory.disabled = false;
+            }
+        }
+    });
+
+    // Step 2: Handle Sub-section Change
+    subCategory.addEventListener('change', function () {
+        const subId = this.value;
+        const catId = mainCategory.value;
+        querySelector.innerHTML = '<option value="">-- Select Query --</option>';
+        querySelector.disabled = true;
+        runQueryBtn.disabled = true;
+
+        if (subId && catId) {
+            const category = hierarchyData.find(c => c.id === catId);
+            const sub = category.subs.find(s => s.id === subId);
+            if (sub && sub.queries) {
+                sub.queries.forEach(q => {
+                    const option = document.createElement('option');
+                    option.value = q.id;
+                    option.textContent = q.title;
+                    querySelector.appendChild(option);
+                });
+                querySelector.disabled = false;
+            }
+        }
+    });
+
+    // Step 3: Handle Query Selection
+    querySelector.addEventListener('change', function () {
+        runQueryBtn.disabled = !this.value;
+    });
+
+    // Final Move: Navigate
+    runQueryBtn.addEventListener('click', function () {
+        const qId = querySelector.value;
+        if (qId) {
+            window.location.href = "{{ url_for('show_query', query_id=0) }}".replace('0', qId);
+        }
+    });
+
+    // Preserving State on Page Load (Very important for UX)
+    window.addEventListener('load', function () {
+        const currentQId = "{{ current_query.id if current_query else '' }}";
+        if (currentQId) {
+            let found = false;
+            for (const cat of hierarchyData) {
+                for (const sub of cat.subs) {
+                    const q = sub.queries.find(q => q.id == currentQId);
+                    if (q) {
+                        mainCategory.value = cat.id;
+                        mainCategory.dispatchEvent(new Event('change'));
+                        subCategory.value = sub.id;
+                        subCategory.dispatchEvent(new Event('change'));
+                        querySelector.value = q.id;
+                        runQueryBtn.disabled = false;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+        }
+    });
+</script>
+
+<style>
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.2);
+    }
+</style>
 {% endblock %}

@@ -4,6 +4,20 @@
 CREATE DATABASE IF NOT EXISTS ElectionSystem;
 USE ElectionSystem;
 
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS Vote;
+DROP TABLE IF EXISTS VoterParticipation;
+DROP TABLE IF EXISTS Complaint;
+DROP TABLE IF EXISTS Observer;
+DROP TABLE IF EXISTS Candidate;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Voter;
+DROP TABLE IF EXISTS Booth;
+DROP TABLE IF EXISTS Election;
+DROP TABLE IF EXISTS Constituency;
+DROP TABLE IF EXISTS PoliticalParty;
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- 1. Political Party Table
 CREATE TABLE IF NOT EXISTS PoliticalParty (
     PartyID INT AUTO_INCREMENT PRIMARY KEY,
@@ -64,6 +78,8 @@ CREATE TABLE IF NOT EXISTS Candidate (
     ElectionID INT NOT NULL,
     AffidavitDetails TEXT,
     TotalAssets DECIMAL(15, 2),
+    Gender ENUM('Male', 'Female', 'Other') NOT NULL DEFAULT 'Male',
+    DOB DATE,
     FOREIGN KEY (PartyID) REFERENCES PoliticalParty(PartyID)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (ConstituencyID) REFERENCES Constituency(ConstituencyID)
@@ -125,4 +141,16 @@ CREATE TABLE IF NOT EXISTS Complaint (
     FiledDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (VoterID) REFERENCES Voter(VoterID),
     FOREIGN KEY (ElectionID) REFERENCES Election(ElectionID)
+);
+
+-- 11. Users Table (Authentication)
+CREATE TABLE IF NOT EXISTS Users (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    Role ENUM('Admin', 'Voter') NOT NULL,
+    VoterID INT NULL, -- Linked to VoterID for Voter role
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VoterID) REFERENCES Voter(VoterID)
+        ON UPDATE CASCADE ON DELETE SET NULL
 );

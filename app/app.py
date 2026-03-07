@@ -8,15 +8,67 @@ if current_dir in sys.path:
     sys.path.remove(current_dir)
 sys.path.append(parent_dir)
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+from functools import wraps
 from app.db import execute_query, execute_procedure, close_db
-from app.queries_data import QUERIES
+from app.queries_data import QUERIES, QUERY_HIERARCHY
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = 'supersecretkey' 
 @app.teardown_appcontext
 def teardown_db(error):
     close_db(error)
+
+# ============================
+# AUTHENTICATION DECORATORS
+# ============================
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("Please log in to access this page.", "warning")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'role' not in session or session['role'] != 'Admin':
+            flash("Admin access required for this section.", "danger")
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# ============================
+# AUTH ROUTES
+# ============================
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        user = execute_query("SELECT * FROM Users WHERE Username = %s AND Password = %s", 
+                             (username, password), fetch_one=True)
+        
+        if user:
+            session['user_id'] = user['UserID']
+            session['username'] = user['Username']
+            session['role'] = user['Role']
+            session['voter_id'] = user['VoterID']
+            flash(f"Welcome back, {user['Username']}!", "success")
+            return redirect(url_for('index'))
+        else:
+            flash("Invalid credentials. Try admin/admin123", "danger")
+            
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for('index'))
 
 
 @app.route('/')
@@ -48,8 +100,15 @@ def register():
                  VALUES (%s, %s, %s, %s, %s, %s)"""
         execute_query(sql, (epic, name, dob, gender, address, constituency_id), commit=True)
         
-        flash("Registration Successful! Please vote.", "success")
-        return redirect(url_for('index'))
+        # Create User Account for the new voter
+        voter = execute_query("SELECT VoterID FROM Voter WHERE EPIC_Number = %s", (epic,), fetch_one=True)
+        if voter:
+            # Default username is EPIC, default password is 'password' (should be changed later)
+            execute_query("INSERT INTO Users (Username, Password, Role, VoterID) VALUES (%s, %s, %s, %s)",
+                         (epic, 'password', 'Voter', voter['VoterID']), commit=True)
+        
+        flash("Registration Successful! Your login is your EPIC and password is 'password'.", "success")
+        return redirect(url_for('login'))
     
     # GET: Show Form
     constituencies = execute_query("SELECT * FROM Constituency")
@@ -130,6 +189,7 @@ def cast_vote_submit(req):
 # ANALYTICS & RESULTS
 # ============================
 @app.route('/results')
+@login_required
 def results():
     # Calling Views
     turnout = execute_query("SELECT * FROM View_Election_Turnout")
@@ -146,6 +206,7 @@ def results():
 # ============================
 @app.route('/queries')
 @app.route('/queries/<int:query_id>')
+@admin_required
 def show_query(query_id=None):
     current_query = None
     results = None
@@ -156,7 +217,10 @@ def show_query(query_id=None):
         if current_query:
             results = execute_query(current_query['sql'])
             
-    return render_template('queries.html', queries=QUERIES, current_query=current_query, results=results)
+    return render_template('queries.html', 
+                           hierarchy=QUERY_HIERARCHY, 
+                           current_query=current_query, 
+                           results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)
